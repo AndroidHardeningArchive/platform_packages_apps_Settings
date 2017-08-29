@@ -147,10 +147,13 @@ public class SecuritySettings extends SettingsPreferenceFragment
     private static final String KEY_KEYGUARD_CAMERA = "keyguard_camera";
     private static final String KEYGUARD_CAMERA_PERSIST_PROP = "persist.keyguard.camera";
 
+    private static final String KEY_NATIVE_DEBUG = "native_debug";
+    private static final String NATIVE_DEBUG_PERSIST_PROP = "persist.security.native_debug";
+
     // These switch preferences need special handling since they're not all stored in Settings.
     private static final String SWITCH_PREFERENCE_KEYS[] = {
             KEY_SHOW_PASSWORD, KEY_UNIFICATION, KEY_VISIBLE_PATTERN_PROFILE, KEY_DENY_NEW_USB,
-            KEY_KEYGUARD_CAMERA, KEY_SCRAMBLE_PIN_LAYOUT
+            KEY_KEYGUARD_CAMERA, KEY_SCRAMBLE_PIN_LAYOUT, KEY_NATIVE_DEBUG
     };
 
     // Only allow one trust agent on the platform.
@@ -183,6 +186,8 @@ public class SecuritySettings extends SettingsPreferenceFragment
 
     private ListPreference mDenyNewUsb;
     private SwitchPreference mKeyguardCamera;
+
+    private SwitchPreference mNativeDebug;
 
     private String mCurrentDevicePassword;
     private String mCurrentProfilePassword;
@@ -405,6 +410,12 @@ public class SecuritySettings extends SettingsPreferenceFragment
 
         // Advanced Security features
         initTrustAgentPreference(root, numberOfTrustAgent);
+
+        if (mIsAdmin) {
+            mNativeDebug = (SwitchPreference) findPreference(KEY_NATIVE_DEBUG);
+        } else {
+            root.removePreference(root.findPreference(KEY_NATIVE_DEBUG));
+        }
 
         // The above preferences come and go based on security state, so we need to update
         // the index. This call is expected to be fairly cheap, but we may want to do something
@@ -668,6 +679,10 @@ public class SecuritySettings extends SettingsPreferenceFragment
         if (mKeyguardCamera != null) {
             mKeyguardCamera.setChecked(SystemProperties.getBoolean(KEYGUARD_CAMERA_PERSIST_PROP, true));
         }
+
+        if (mNativeDebug != null) {
+            mNativeDebug.setChecked(SystemProperties.getBoolean(NATIVE_DEBUG_PERSIST_PROP, true));
+        }
     }
 
     private void updateUnificationPreference() {
@@ -866,6 +881,8 @@ public class SecuritySettings extends SettingsPreferenceFragment
             }
         } else if (KEY_KEYGUARD_CAMERA.equals(key)) {
             SystemProperties.set(KEYGUARD_CAMERA_PERSIST_PROP, (Boolean) value ? "1" : "0");
+        } else if (KEY_NATIVE_DEBUG.equals(key)) {
+            SystemProperties.set(NATIVE_DEBUG_PERSIST_PROP, (Boolean) value ? "1" : "0");
         }
         return result;
     }
